@@ -2,7 +2,7 @@ from typing import Any, Mapping, Type, TypeVar
 
 from pydantic import BaseModel
 
-from molviewspec import __version__
+from molviewspec.molviewspec import __version__
 
 TParams = TypeVar("TParams", bound=BaseModel)
 

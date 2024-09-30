@@ -39,6 +39,8 @@ from molviewspec.nodes import (
     RawSegmentationOptionsT,
     RawSegmentationParams,
     RawSegmentationSourceT,
+    RawVolumeAndSegmentationParams,
+    RawVolumeAndSegmentationSourcesT,
     RawVolumeOptionsT,
     RawVolumeParams,
     RawVolumeSourceT,
@@ -56,6 +58,8 @@ from molviewspec.nodes import (
     TooltipInlineParams,
     TransformParams,
     TransparencyInlineParams,
+    VolumeAndSegmentationRepresentationParams,
+    VolumeAndSegmentationRepresentationTypeT,
     VolumeRepresentationParams,
     VolumeRepresentationTypeT,
 )
@@ -234,20 +238,21 @@ class Parse(_Base):
     """
     Builder step with operations needed after parsing structure data.
     """
-    def raw_segmentation(
+    def raw_volume_and_segmentation(
         self,
         *,
-        source: RawSegmentationSourceT,
-        options: RawSegmentationOptionsT | None = None,
+        sources: RawVolumeAndSegmentationSourcesT,
+        # TODO: implement
+        # options: RawSegmentationOptionsT | None = None,
         additional_properties: AdditionalProperties = None,
-    ) -> RawSegmentation:
+    ) -> RawVolumeAndSegmentation:
         """
         Create a raw segmentation
         """
-        params = make_params(RawSegmentationParams, locals(), type="raw_volume")
-        node = Node(kind="raw_segmentation", params=params, additional_properties=additional_properties)
+        params = make_params(RawVolumeAndSegmentationParams, locals(), type="raw_volume_and_segmentation")
+        node = Node(kind="raw_volume_and_segmentation", params=params, additional_properties=additional_properties)
         self._add_child(node)
-        return RawSegmentation(node=node, root=self._root)
+        return RawVolumeAndSegmentation(node=node, root=self._root)
     
     def raw_volume(
         self,
@@ -356,23 +361,51 @@ class Parse(_Base):
         return Structure(node=node, root=self._root)
     
 
-class RawSegmentation(_Base):
+class RawVolumeAndSegmentation(_Base):
     """
     Builder step with operations needed after defining the raw segmentation to work with.
     """
-    def segmentation_representation(
-        self, *, type: SegmentationRepresentationTypeT = "lattice", additional_properties: AdditionalProperties = None
-    ) -> SegmentationRepresentation:
+    def volume_and_segmentation_representation(
+        self, *, volume_type: VolumeRepresentationTypeT = 'isosurface', segmentation_type: SegmentationRepresentationTypeT = 'lattice', additional_properties: AdditionalProperties = None
+    ) -> VolumeAndSegmentationRepresentation:
         """
-        Add a representation for this component.
-        :param type: the type of representation, defaults to 'lattice'
+        Add a representation for this node.
+        :param type: the type of representation, defaults to 'isosurface'
         :param additional_properties: optional, custom data to attach to this node
         :return: a builder that handles operations at representation level
         """
-        params = make_params(SegmentationRepresentationParams, locals())
-        node = Node(kind="segmentation_representation", params=params, additional_properties=additional_properties)
+        params = make_params(VolumeAndSegmentationRepresentationParams, locals())
+        node = Node(kind="volume_and_segmentation_representation", params=params, additional_properties=additional_properties)
         self._add_child(node)
-        return SegmentationRepresentation(node=node, root=self._root)
+        return VolumeAndSegmentationRepresentation(node=node, root=self._root)
+
+    # def volume_and_segmentation_representation(
+    #     self, *, volume_type: VolumeRepresentationTypeT = "isosurface", segmentation_type: SegmentationRepresentationTypeT = "lattice", additional_properties: AdditionalProperties = None
+    # ) -> VolumeRepresentation:
+    #     """
+    #     Add a representation for this node.
+    #     :param type: the type of representation, defaults to 'isosurface'
+    #     :param additional_properties: optional, custom data to attach to this node
+    #     :return: a builder that handles operations at representation level
+    #     """
+    #     params = make_params(VolumeRepresentationParams, locals())
+    #     node = Node(kind="volume_representation", params=params, additional_properties=additional_properties)
+    #     self._add_child(node)
+    #     return VolumeRepresentation(node=node, root=self._root)
+    
+    # def segmentation_representation(
+    #     self, *, type: SegmentationRepresentationTypeT = "lattice", additional_properties: AdditionalProperties = None
+    # ) -> SegmentationRepresentation:
+    #     """
+    #     Add a representation for this node.
+    #     :param type: the type of representation, defaults to 'lattice'
+    #     :param additional_properties: optional, custom data to attach to this node
+    #     :return: a builder that handles operations at representation level
+    #     """
+    #     params = make_params(SegmentationRepresentationParams, locals())
+    #     node = Node(kind="segmentation_representation", params=params, additional_properties=additional_properties)
+    #     self._add_child(node)
+    #     return SegmentationRepresentation(node=node, root=self._root)
 
 class RawVolume(_Base):
     """
@@ -800,7 +833,7 @@ class Representation(_Base):
         return self
 
 
-class SegmentationRepresentation(_Base):
+class VolumeAndSegmentationRepresentation(_Base):
     """
     Builder step with operations relating to particular representations.
     """

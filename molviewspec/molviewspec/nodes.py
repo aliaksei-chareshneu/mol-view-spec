@@ -30,6 +30,7 @@ KindT = Literal[
     "line",
     "parse",
     "raw_volume",
+    "raw_volume_and_segmentation",
     "representation",
     "sphere",
     "structure",
@@ -38,7 +39,8 @@ KindT = Literal[
     "tooltip_from_uri",
     "transform",
     "transparency",
-    "volume_representation"
+    "volume_representation",
+    "volume_and_segmentation_representation"
 ]
 
 
@@ -168,6 +170,10 @@ RawVolumeSourceT = Literal["map"]
 
 RawSegmentationSourceT = Literal["sff"]
 
+class RawVolumeAndSegmentationSourcesT(TypedDict):
+    volume_source: RawVolumeSourceT
+    segmentation_source: RawSegmentationSourceT
+
 ChannelIdsMapping = dict[str, str]
 SegmentationIdsMapping = dict[str, str]
 
@@ -204,6 +210,11 @@ class RawVolumeParams(BaseModel):
 
     source: RawVolumeSourceT = Field(description="The type of the raw input file with volumetric data.")
     options: RawVolumeOptionsT = Field(description="Specifies the voxel size and mapping of sequential channel IDs to user-defined channel IDs.")
+
+
+class RawVolumeAndSegmentationParams(BaseModel):
+    volume: RawVolumeParams
+    segmentation: RawSegmentationParams
     
 class ParseParams(BaseModel):
     """
@@ -274,6 +285,10 @@ class ComponentExpression(BaseModel):
     )
     atom_id: Optional[int] = Field(description="Unique atom identifier (`_atom_site.id`)")
     atom_index: Optional[int] = Field(description="0-based atom index in the source file")
+
+class VolumeAndSegmentationRepresentationTypeT(TypedDict):
+    # volume: VolumeRepresentationTypeT
+    segmentation: SegmentationRepresentationTypeT
 
 VolumeRepresentationTypeT = Literal["isosurface", "direct_volume", "slice"]
 # TODO: mesh, geometric
@@ -430,6 +445,13 @@ ColorNamesT = Literal[
 ]
 ColorT = Union[ColorNamesT, str]  # str represents hex colors for now
 
+
+class VolumeAndSegmentationRepresentationParams(BaseModel):
+    """
+    Representation node, describing how to represent a volume and a segmentation.
+    """
+    volume_type: VolumeRepresentationTypeT = Field(description="Representation type, i.e. i.e. isosurface, direct_volume, or slice")
+    segmentation_type: SegmentationRepresentationTypeT = Field(description="Representation type, i.e. lattice")
 
 class SegmentationRepresentationParams(BaseModel):
     """
