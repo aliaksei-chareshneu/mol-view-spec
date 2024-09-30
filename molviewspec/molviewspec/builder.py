@@ -36,6 +36,9 @@ from molviewspec.nodes import (
     Node,
     ParseFormatT,
     ParseParams,
+    RawSegmentationOptionsT,
+    RawSegmentationParams,
+    RawSegmentationSourceT,
     RawVolumeOptionsT,
     RawVolumeParams,
     RawVolumeSourceT,
@@ -43,6 +46,8 @@ from molviewspec.nodes import (
     RepresentationTypeT,
     SchemaFormatT,
     SchemaT,
+    SegmentationRepresentationParams,
+    SegmentationRepresentationTypeT,
     SphereParams,
     State,
     StructureParams,
@@ -229,6 +234,21 @@ class Parse(_Base):
     """
     Builder step with operations needed after parsing structure data.
     """
+    def raw_segmentation(
+        self,
+        *,
+        source: RawSegmentationSourceT,
+        options: RawSegmentationOptionsT | None = None,
+        additional_properties: AdditionalProperties = None,
+    ) -> RawSegmentation:
+        """
+        Create a raw segmentation
+        """
+        params = make_params(RawSegmentationParams, locals(), type="raw_volume")
+        node = Node(kind="raw_segmentation", params=params, additional_properties=additional_properties)
+        self._add_child(node)
+        return RawSegmentation(node=node, root=self._root)
+    
     def raw_volume(
         self,
         *,
@@ -336,6 +356,23 @@ class Parse(_Base):
         return Structure(node=node, root=self._root)
     
 
+class RawSegmentation(_Base):
+    """
+    Builder step with operations needed after defining the raw segmentation to work with.
+    """
+    def segmentation_representation(
+        self, *, type: SegmentationRepresentationTypeT = "lattice", additional_properties: AdditionalProperties = None
+    ) -> SegmentationRepresentation:
+        """
+        Add a representation for this component.
+        :param type: the type of representation, defaults to 'lattice'
+        :param additional_properties: optional, custom data to attach to this node
+        :return: a builder that handles operations at representation level
+        """
+        params = make_params(SegmentationRepresentationParams, locals())
+        node = Node(kind="segmentation_representation", params=params, additional_properties=additional_properties)
+        self._add_child(node)
+        return SegmentationRepresentation(node=node, root=self._root)
 
 class RawVolume(_Base):
     """
@@ -762,6 +799,74 @@ class Representation(_Base):
         self._add_child(node)
         return self
 
+
+class SegmentationRepresentation(_Base):
+    """
+    Builder step with operations relating to particular representations.
+    """
+
+    # def color_from_uri(
+    #     self,
+    #     *,
+    #     schema: SchemaT,
+    #     uri: str,
+    #     format: str,
+    #     category_name: str | None = None,
+    #     field_name: str | None = None,
+    #     block_header: str | None = None,
+    #     block_index: int | None = None,
+    #     additional_properties: AdditionalProperties = None,
+    # ) -> Representation:
+    #     """
+    #     Use another resource to define colors of this representation.
+    #     :param schema: granularity/type of the selection
+    #     :param uri: resource location
+    #     :param format: format ('cif', 'bcif', 'json') of the content
+    #     :param category_name: only applies when format is 'cif' or 'bcif'
+    #     :param field_name: name of the column in CIF or field name (key) in JSON that contains the desired value (color/label/tooltip/component...); the default value is 'color'/'label'/'tooltip'/'component' depending on the node kind
+    #     :param block_header: only applies when format is 'cif' or 'bcif'
+    #     :param block_index: only applies when format is 'cif' or 'bcif'
+    #     :param additional_properties: optional, custom data to attach to this node
+    #     :return: this builder
+    #     """
+    #     params = make_params(ColorFromUriParams, locals())
+    #     node = Node(kind="color_from_uri", params=params, additional_properties=additional_properties)
+    #     self._add_child(node)
+    #     return self
+
+    def color(
+        self,
+        *,
+        color: ColorT,
+        selector: ComponentSelectorT | ComponentExpression | list[ComponentExpression] = "all",
+        additional_properties: AdditionalProperties = None,
+    ) -> Representation:
+        """
+        Customize the color of this representation.
+        :param color: color using SVG color names or RGB hex code
+        :param selector: optional selector, defaults to applying the color to the whole representation
+        :param additional_properties: optional, custom data to attach to this node
+        :return: this builder
+        """
+        params = make_params(ColorInlineParams, locals())
+        node = Node(kind="color", params=params, additional_properties=additional_properties)
+        self._add_child(node)
+        return self
+
+    # TODO
+    def transparency(
+        self, *, transparency: float = 0.8, additional_properties: AdditionalProperties = None
+    ) -> Representation:
+        """
+        Customize the transparency/opacity of this representation.
+        :param transparency: float describing how transparent this representation should be, 0.0: fully opaque, 1.0: fully transparent
+        :param additional_properties: optional, custom data to attach to this node
+        :return: this builder
+        """
+        params = make_params(TransparencyInlineParams, locals())
+        node = Node(kind="transparency", params=params, additional_properties=additional_properties)
+        self._add_child(node)
+        return self
 
 class VolumeRepresentation(_Base):
     """

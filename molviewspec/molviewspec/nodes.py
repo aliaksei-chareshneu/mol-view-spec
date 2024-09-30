@@ -162,12 +162,23 @@ class DownloadParams(BaseModel):
     url: str = Field(description="URL from which to pull structure data.")
 
 
-ParseFormatT = Literal["mmcif", "bcif", "pdb", "map"]
+ParseFormatT = Literal["mmcif", "bcif", "pdb", "map", "sff"]
 # RawVolumeSourceT = Literal["map", "omezarr", "ometiff_image", "tiff_stack"]
 RawVolumeSourceT = Literal["map"]
 
+RawSegmentationSourceT = Literal["sff"]
+
 ChannelIdsMapping = dict[str, str]
-    
+SegmentationIdsMapping = dict[str, str]
+
+class RawSegmentationOptionsT(TypedDict):
+    """
+    Specifies the desired voxel size. Overwrites the automatically determined voxel size (e.g., the one based on the file header or its analogue).
+    Specifies the mapping of sequential segmentation IDs to user-defined ones.
+    """
+    voxel_size: float | None
+    segmentation_ids_mapping: SegmentationIdsMapping | None
+
 
 class RawVolumeOptionsT(TypedDict):
     """
@@ -177,6 +188,14 @@ class RawVolumeOptionsT(TypedDict):
     voxel_size: float | None
     channel_ids_mapping: ChannelIdsMapping | None
 
+
+class RawSegmentationParams(BaseModel):
+    """
+    Create a segmentation from a parsed data resource based on the provided parameters
+    """
+
+    source: RawSegmentationSourceT = Field(description="The type of the raw input file with segmentation data.")
+    options: RawSegmentationOptionsT = Field(description="Specifies the voxel size and mapping of sequential segmentation IDs to user-defined segmentation IDs.")
     
 class RawVolumeParams(BaseModel):
     """
@@ -256,8 +275,9 @@ class ComponentExpression(BaseModel):
     atom_id: Optional[int] = Field(description="Unique atom identifier (`_atom_site.id`)")
     atom_index: Optional[int] = Field(description="0-based atom index in the source file")
 
-# TODO: "slice"
 VolumeRepresentationTypeT = Literal["isosurface", "direct_volume", "slice"]
+# TODO: mesh, geometric
+SegmentationRepresentationTypeT = Literal["lattice"]
 RepresentationTypeT = Literal["ball_and_stick", "cartoon"]
 ColorNamesT = Literal[
     "aliceblue",
@@ -411,13 +431,18 @@ ColorNamesT = Literal[
 ColorT = Union[ColorNamesT, str]  # str represents hex colors for now
 
 
-# TODO: Segmentation too?
+class SegmentationRepresentationParams(BaseModel):
+    """
+    Representation node, describing how to represent a segmentation.
+    """
+    type: VolumeRepresentationTypeT = Field(description="Representation type, i.e. lattice")
+
+
 class VolumeRepresentationParams(BaseModel):
     """
     Representation node, describing how to represent a volume.
     """
-    # TODO: add slice
-    type: VolumeRepresentationTypeT = Field(description="Representation type, i.e. isosurface or direct_volume")
+    type: VolumeRepresentationTypeT = Field(description="Representation type, i.e. isosurface, direct_volume, or slice")
 
 class RepresentationParams(BaseModel):
     """
